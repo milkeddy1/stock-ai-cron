@@ -12,7 +12,10 @@ const DEFAULT_SYMBOLS = ["FLNC", "LEU", "NVX", "APLD", "LAC"] as const;
 function parseWatchlist(): string[] {
   const raw = process.env.WATCHLIST;
   if (!raw?.trim()) return [...DEFAULT_SYMBOLS];
-  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 function buildWhalePulsePrompt(data: StockData): string {
@@ -32,7 +35,7 @@ function buildWhalePulsePrompt(data: StockData): string {
 /**
  * 抓取 Yahoo → 流動性指標 → Gemini → Discord Webhook。
  */
-export async function whalePulseJob(): Promise<void> {
+export async function whalePulseJob(disableAi: boolean = false): Promise<void> {
   try {
     const geminiKey = process.env.GEMINI_API_KEY ?? "";
     const webhookUrl = process.env.DISCORD_WEBHOOK_URL ?? "";
@@ -44,9 +47,9 @@ export async function whalePulseJob(): Promise<void> {
     const dataList = await getStockData(yahoo, symbols);
 
     const prompts = dataList.map(buildWhalePulsePrompt);
-    const aiResponses = await Promise.all(
-      prompts.map((p) => gemini.generateAnalysis(p)),
-    );
+    const aiResponses = disableAi
+      ? prompts.map(() => "disabled")
+      : await Promise.all(prompts.map((p) => gemini.generateAnalysis(p)));
 
     const discordPayload = buildWhalePulseEmbeds(dataList, aiResponses);
     await sendDiscordWebhook(webhookUrl, discordPayload);
