@@ -2,10 +2,10 @@
   "name": "stock-ai-cron",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "start": "tsx index.ts",
+    "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,7 +16,6 @@
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
     "@google/genai": "^1.47.0",
-    "@google/generative-ai": "^0.24.1",
     "axios": "^1.14.0",
     "dotenv": "^17.3.1",
     "yahoo-finance2": "^3.14.0"
