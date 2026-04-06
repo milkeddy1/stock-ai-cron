@@ -5,6 +5,9 @@ export type YahooChartQuotes = {
   volumes: VolumeSeries;
   /** Session date per bar, same order and length as `volumes`. */
   barDates: readonly Date[];
+  highs: readonly number[];
+  lows: readonly number[];
+  closes: readonly number[];
 };
 
 /** Quote API mapped for liquidity + display (no Yahoo-specific field names). */

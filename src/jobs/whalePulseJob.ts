@@ -25,6 +25,7 @@ function buildWhalePulsePrompt(data: StockData): string {
             - 漲跌幅: ${data.change}
             - 當前成交量: ${data.currentVol}
             - 20日平均成交量: ${data.avgVol20d}
+            - ATR (14) 占現價比例: ${data.atr}
             - 相對成交量 (RVOL): ${data.rvol}
             - 20日平均 RVOL: ${data.avgRvol20d}
             - 上個月平均 RVOL: ${data.avgRvolPrevMonth}

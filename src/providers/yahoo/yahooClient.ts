@@ -32,7 +32,10 @@ export function createYahooClient(options?: {
       const quotes = chartData.quotes ?? [];
       const volumes = quotes.map((q) => q.volume || 0);
       const barDates = quotes.map((q) => q.date);
-      return { volumes, barDates };
+      const highs = quotes.map((q) => q.high ?? q.close ?? 0);
+      const lows = quotes.map((q) => q.low ?? q.close ?? 0);
+      const closes = quotes.map((q) => q.close ?? 0);
+      return { volumes, barDates, highs, lows, closes };
     },
 
     async fetchQuote(symbol: string): Promise<YahooQuoteSnapshot> {

@@ -25,4 +25,10 @@ export type StockData = {
   rvol: string;
   avgRvol20d: string;
   avgRvolPrevMonth: string;
+  /** Wilder ATR(14) ÷ 當前價 × 100% 之字串（如 "3.45%"）；價格無效時為「—」。 */
+  atr: string;
+  /** QuickChart 柱狀圖 URL：近 14 交易日每日 RVOL（分母為前 20 日均量、不含當日）。 */
+  rvol14dTrendChartUrl: string;
+  /** QuickChart 柱狀圖 URL：近 14 交易日每日 ATR(14)÷收盤×100%。 */
+  atr14dTrendChartUrl: string;
 };

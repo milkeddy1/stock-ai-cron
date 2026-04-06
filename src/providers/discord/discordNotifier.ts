@@ -45,11 +45,25 @@ export function buildWhalePulseEmbeds(
           inline: true,
         },
         {
-          name: "20日平均成交量",
-          value: data.avgVol20d.toString(),
+          name: "近14交易日 RVOL（÷20日均量）",
+          value: data.rvol14dTrendChartUrl
+            ? `[柱狀圖](${data.rvol14dTrendChartUrl})`
+            : "—",
           inline: true,
         },
-        { name: "AI 判讀", value: aiTexts[index] ?? "" },
+        {
+          name: "ATR (14) / 現價",
+          value: data.atr,
+          inline: true,
+        },
+        {
+          name: "近14交易日 ATR%（÷收盤）",
+          value: data.atr14dTrendChartUrl
+            ? `[柱狀圖](${data.atr14dTrendChartUrl})`
+            : "—",
+          inline: true,
+        },
+        // { name: "AI 判讀", value: aiTexts[index] ?? "" },
       ],
       footer: { text: `執行時間: ${executedAt}` },
     })),
