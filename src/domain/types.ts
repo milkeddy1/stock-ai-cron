@@ -11,6 +11,8 @@ export type ComputedLiquidityMetrics = {
   avgVol20d: number;
   rvol: string;
   avgRvol20d: string;
+  /** 上個日曆月各交易日 RVOL（當日量／前 window 日均量）之平均；資料不足時為 "0.00"。 */
+  avgRvolPrevMonth: string;
 };
 
 /** 監控任務組裝後要給 AI / Discord 的標的資料。 */
@@ -22,4 +24,5 @@ export type StockData = {
   avgVol20d: number;
   rvol: string;
   avgRvol20d: string;
+  avgRvolPrevMonth: string;
 };

@@ -18,7 +18,7 @@ export function computeAvgVolumeLastN(
 /**
  * 對序列中每個索引 i：當日 RVOL = volumes[i] / 前 window 日均量（不含當日）。
  * 起算索引與既有邏輯一致：`max(window, length - window)`。
- */
+ */ 
 export function computeDailyRvolSeries(
   volumes: VolumeSeries,
   window: number = DEFAULT_VOLUME_WINDOW,
@@ -51,6 +51,52 @@ export function formatAvgRvol20d(rvolSeries: readonly number[]): string {
   return formatRvolRatio(average(rvolSeries));
 }
 
+/** 以 UTC 年月界定「上個日曆月」（避免與 bar 的 date 解讀不一致）。 */
+function previousUtcCalendarMonth(now: Date): { year: number; month: number } {
+  const y = now.getUTCFullYear();
+  const m = now.getUTCMonth();
+  if (m === 0) return { year: y - 1, month: 11 };
+  return { year: y, month: m - 1 };
+}
+
+/**
+ * 上個日曆月內每個交易日的 RVOL（當日量／前 window 日均量，不含當日）之平均。
+ * `barDates` 須與 `volumes` 等長；索引不足或該月無完整 bar 時回傳 "0.00"。
+ */
+export function computeAvgRvolPreviousCalendarMonth(
+  volumes: VolumeSeries,
+  barDates: readonly Date[],
+  window: number = DEFAULT_VOLUME_WINDOW,
+): string {
+  if (
+    barDates.length !== volumes.length ||
+    volumes.length <= window
+  ) {
+    return formatRvolRatio(0);
+  }
+
+  const { year: targetYear, month: targetMonth } =
+    previousUtcCalendarMonth(new Date());
+
+  const dailyRvols: number[] = [];
+  for (let i = window; i < volumes.length; i += 1) {
+    const d = barDates[i]!;
+    if (d.getUTCFullYear() !== targetYear || d.getUTCMonth() !== targetMonth) {
+      continue;
+    }
+    const prev = volumes.slice(i - window, i);
+    const prevAvg =
+      prev.length > 0
+        ? prev.reduce((acc, vol) => acc + vol, 0) / prev.length
+        : 0;
+    const dailyRvol = prevAvg > 0 ? volumes[i]! / prevAvg : 0;
+    dailyRvols.push(dailyRvol);
+  }
+
+  if (dailyRvols.length === 0) return formatRvolRatio(0);
+  return formatRvolRatio(average(dailyRvols));
+}
+
 /** 當日成交量相對於參考均量（通常為 20 日均量）的 RVOL 字串。 */
 export function computeSnapshotRvol(
   currentVol: number,
@@ -69,6 +115,7 @@ export function computeLiquidityMetrics(
   volumes: VolumeSeries,
   currentVol: number,
   window: number = DEFAULT_VOLUME_WINDOW,
+  barDates?: readonly Date[],
 ): ComputedLiquidityMetrics {
   const avgVol20dRaw = computeAvgVolumeLastN(volumes, window);
   const rvolSeries = computeDailyRvolSeries(volumes, window);
@@ -76,5 +123,9 @@ export function computeLiquidityMetrics(
     avgVol20d: Math.round(avgVol20dRaw),
     rvol: computeSnapshotRvol(currentVol, avgVol20dRaw),
     avgRvol20d: formatAvgRvol20d(rvolSeries),
+    avgRvolPrevMonth:
+      barDates && barDates.length === volumes.length
+        ? computeAvgRvolPreviousCalendarMonth(volumes, barDates, window)
+        : formatRvolRatio(0),
   };
 }

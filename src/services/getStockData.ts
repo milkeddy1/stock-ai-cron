@@ -1,4 +1,7 @@
-import { computeLiquidityMetrics } from "../domain/stockMetrics.js";
+import {
+  computeLiquidityMetrics,
+  DEFAULT_VOLUME_WINDOW,
+} from "../domain/stockMetrics.js";
 import type { StockData } from "../domain/types.js";
 import type { YahooClient } from "../providers/yahoo/index.js";
 
@@ -15,10 +18,15 @@ export async function getStockData(
     symbolList.map(async (symbol) => {
       console.log(`正在抓取 ${symbol} 的數據...`);
 
-      const { volumes } = await yahoo.fetchChartQuotes(symbol);
+      const { volumes, barDates } = await yahoo.fetchChartQuotes(symbol);
       const quote = await yahoo.fetchQuote(symbol);
 
-      const metrics = computeLiquidityMetrics(volumes, quote.currentVol);
+      const metrics = computeLiquidityMetrics(
+        volumes,
+        quote.currentVol,
+        DEFAULT_VOLUME_WINDOW,
+        barDates,
+      );
 
       return {
         symbol,

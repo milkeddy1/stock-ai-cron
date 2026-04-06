@@ -27,6 +27,7 @@ function buildWhalePulsePrompt(data: StockData): string {
             - 20日平均成交量: ${data.avgVol20d}
             - 相對成交量 (RVOL): ${data.rvol}
             - 20日平均 RVOL: ${data.avgRvol20d}
+            - 上個月平均 RVOL: ${data.avgRvolPrevMonth}
             
             請根據 RVOL 指標（若大於 1.5 代表異常放量）簡單分析是否有機構進場跡象，並用 100 字以內的正體中文總結建議。
         `;

@@ -1,8 +1,8 @@
 import YahooFinance from "yahoo-finance2";
 import type { YahooChartQuotes, YahooQuoteSnapshot } from "./types.js";
 
-/** Matches prior `getStockData` chart window (enough bars for 20d RVOL stats). */
-const DEFAULT_CHART_LOOKBACK_DAYS = 60;
+/** Enough history for 20d RVOL plus prior calendar month (≈20 sessions + 20-day lookback). */
+const DEFAULT_CHART_LOOKBACK_DAYS = 100;
 
 /** Aligns with `yahoo-finance2` NOTICE_IDS for `suppressNotices`. */
 type YahooNoticeId = "yahooSurvey" | "ripHistorical";
@@ -31,7 +31,8 @@ export function createYahooClient(options?: {
       });
       const quotes = chartData.quotes ?? [];
       const volumes = quotes.map((q) => q.volume || 0);
-      return { volumes };
+      const barDates = quotes.map((q) => q.date);
+      return { volumes, barDates };
     },
 
     async fetchQuote(symbol: string): Promise<YahooQuoteSnapshot> {

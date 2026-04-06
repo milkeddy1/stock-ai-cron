@@ -35,6 +35,11 @@ export function buildWhalePulseEmbeds(
           inline: true,
         },
         {
+          name: "上個月平均 RVOL",
+          value: data.avgRvolPrevMonth,
+          inline: true,
+        },
+        {
           name: "當前成交量",
           value: data.currentVol.toString(),
           inline: true,
