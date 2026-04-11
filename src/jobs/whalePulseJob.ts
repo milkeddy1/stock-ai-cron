@@ -7,7 +7,7 @@ import {
 import { createYahooClient } from "../providers/yahoo/index.js";
 import { getStockData } from "../services/getStockData.js";
 
-const DEFAULT_SYMBOLS = ["FLNC", "LEU", "NVX", "APLD", "LAC"] as const;
+const DEFAULT_SYMBOLS = ["FLNC", "LEU", "NVX", "APLD", "LAC", "USAR"] as const;
 
 function parseWatchlist(): string[] {
   const raw = process.env.WATCHLIST;
@@ -16,6 +16,18 @@ function parseWatchlist(): string[] {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+/** Each ticker uses `DISCORD_WEBHOOK_<SYMBOL>` (e.g. DISCORD_WEBHOOK_FLNC). */
+function getDiscordWebhookUrlForSymbol(symbol: string): string {
+  const key = `DISCORD_WEBHOOK_${symbol.toUpperCase()}`;
+  const url = process.env[key]?.trim() ?? "";
+  if (!url) {
+    throw new Error(
+      `Missing Discord webhook for ${symbol}: set ${key} in the environment`,
+    );
+  }
+  return url;
 }
 
 function buildWhalePulsePrompt(data: StockData): string {
@@ -40,7 +52,6 @@ function buildWhalePulsePrompt(data: StockData): string {
 export async function whalePulseJob(disableAi: boolean = false): Promise<void> {
   try {
     const geminiKey = process.env.GEMINI_API_KEY ?? "";
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL ?? "";
 
     const yahoo = createYahooClient();
     const gemini = createGeminiClient({ apiKey: geminiKey });
@@ -53,11 +64,16 @@ export async function whalePulseJob(disableAi: boolean = false): Promise<void> {
       ? prompts.map(() => "disabled")
       : await Promise.all(prompts.map((p) => gemini.generateAnalysis(p)));
 
-    const discordPayload = buildWhalePulseEmbeds(dataList, aiResponses);
-    await sendDiscordWebhook(webhookUrl, discordPayload);
+    for (let i = 0; i < dataList.length; i++) {
+      const data = dataList[i]!;
+      const webhookUrl = getDiscordWebhookUrlForSymbol(data.symbol);
+      const discordPayload = buildWhalePulseEmbeds([data], [aiResponses[i]!]);
+      await sendDiscordWebhook(webhookUrl, discordPayload);
+    }
 
     console.log("✅ 報告已成功送到 Discord！");
   } catch (error) {
     console.error("❌ 發生錯誤:", error);
+    throw error;
   }
 }

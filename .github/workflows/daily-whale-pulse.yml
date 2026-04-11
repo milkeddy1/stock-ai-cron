@@ -1,5 +1,6 @@
 # Repository secrets (Settings → Secrets and variables → Actions):
-#   Required: GEMINI_API_KEY, DISCORD_WEBHOOK_URL
+#   Required: GEMINI_API_KEY
+#   Required per ticker: DISCORD_WEBHOOK_<SYMBOL> (e.g. DISCORD_WEBHOOK_FLNC for FLNC)
 #   Optional: WATCHLIST (comma-separated tickers; omit secret or leave unset to use app defaults)
 #
 # Schedule uses UTC only; runs may start a few minutes late. Adjust the cron hour for your local time.
@@ -31,6 +32,11 @@ jobs:
       - name: Run job
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_FLNC: ${{ secrets.DISCORD_WEBHOOK_FLNC }}
+          DISCORD_WEBHOOK_LEU: ${{ secrets.DISCORD_WEBHOOK_LEU }}
+          DISCORD_WEBHOOK_NVX: ${{ secrets.DISCORD_WEBHOOK_NVX }}
+          DISCORD_WEBHOOK_APLD: ${{ secrets.DISCORD_WEBHOOK_APLD }}
+          DISCORD_WEBHOOK_LAC: ${{ secrets.DISCORD_WEBHOOK_LAC }}
+          DISCORD_WEBHOOK_USAR: ${{ secrets.DISCORD_WEBHOOK_USAR }}
           WATCHLIST: ${{ secrets.WATCHLIST }}
         run: pnpm start
